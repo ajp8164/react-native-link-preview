@@ -1,4 +1,5 @@
-import * as React from 'react'
+import * as React from 'react';
+
 import {
   Image,
   LayoutAnimation,
@@ -11,34 +12,33 @@ import {
   TouchableWithoutFeedbackProps,
   View,
   ViewStyle,
-} from 'react-native'
-
-import { PreviewData, PreviewDataImage } from './types'
-import { getPreviewData, oneOf } from './utils'
+} from 'react-native';
+import { PreviewData, PreviewDataImage } from './types';
+import { getPreviewData, oneOf } from './utils';
 
 export interface LinkPreviewProps {
-  containerStyle?: StyleProp<ViewStyle>
-  enableAnimation?: boolean
-  header?: string
-  metadataContainerStyle?: StyleProp<ViewStyle>
-  metadataTextContainerStyle?: StyleProp<ViewStyle>
-  onPreviewDataFetched?: (previewData: PreviewData) => void
-  previewData?: PreviewData
-  renderDescription?: (description: string) => React.ReactNode
-  renderHeader?: (header: string) => React.ReactNode
-  renderImage?: (image: PreviewDataImage) => React.ReactNode
+  containerStyle?: StyleProp<ViewStyle>;
+  enableAnimation?: boolean;
+  header?: string;
+  metadataContainerStyle?: StyleProp<ViewStyle>;
+  metadataTextContainerStyle?: StyleProp<ViewStyle>;
+  onPreviewDataFetched?: (previewData: PreviewData) => void;
+  previewData?: PreviewData;
+  renderDescription?: (description: string) => React.ReactNode;
+  renderHeader?: (header: string) => React.ReactNode;
+  renderImage?: (image: PreviewDataImage) => React.ReactNode;
   renderLinkPreview?: (payload: {
-    aspectRatio?: number
-    containerWidth: number
-    previewData?: PreviewData
-  }) => React.ReactNode
-  renderMinimizedImage?: (image: PreviewDataImage) => React.ReactNode
-  renderText?: (text: string) => React.ReactNode
-  renderTitle?: (title: string) => React.ReactNode
-  requestTimeout?: number
-  text: string
-  textContainerStyle?: StyleProp<ViewStyle>
-  touchableWithoutFeedbackProps?: TouchableWithoutFeedbackProps
+    aspectRatio?: number;
+    containerWidth: number;
+    previewData?: PreviewData;
+  }) => React.ReactNode;
+  renderMinimizedImage?: (image: PreviewDataImage) => React.ReactNode;
+  renderText?: (text: string) => React.ReactNode;
+  renderTitle?: (title: string) => React.ReactNode;
+  requestTimeout?: number;
+  text: string;
+  textContainerStyle?: StyleProp<ViewStyle>;
+  touchableWithoutFeedbackProps?: TouchableWithoutFeedbackProps;
 }
 
 export const LinkPreview = React.memo(
@@ -62,64 +62,64 @@ export const LinkPreview = React.memo(
     textContainerStyle,
     touchableWithoutFeedbackProps,
   }: LinkPreviewProps) => {
-    const [containerWidth, setContainerWidth] = React.useState(0)
-    const [data, setData] = React.useState(previewData)
+    const [containerWidth, setContainerWidth] = React.useState(0);
+    const [data, setData] = React.useState(previewData);
     const aspectRatio = data?.image
       ? data.image.width / data.image.height
-      : undefined
+      : undefined;
 
     React.useEffect(() => {
-      let isCancelled = false
+      let isCancelled = false;
       if (previewData) {
-        setData(previewData)
-        return
+        setData(previewData);
+        return;
       }
 
       const fetchData = async () => {
-        setData(undefined)
-        const newData = await getPreviewData(text, requestTimeout)
+        setData(undefined);
+        const newData = await getPreviewData(text, requestTimeout);
         // Set data only if component is still mounted
         /* istanbul ignore next */
         if (!isCancelled) {
           // No need to cover LayoutAnimation
           /* istanbul ignore next */
           if (enableAnimation) {
-            LayoutAnimation.easeInEaseOut()
+            LayoutAnimation.easeInEaseOut();
           }
-          setData(newData)
-          onPreviewDataFetched?.(newData)
+          setData(newData);
+          onPreviewDataFetched?.(newData);
         }
-      }
+      };
 
-      fetchData()
+      fetchData();
       return () => {
-        isCancelled = true
-      }
+        isCancelled = true;
+      };
     }, [
       enableAnimation,
       onPreviewDataFetched,
       previewData,
       requestTimeout,
       text,
-    ])
+    ]);
 
     const handleContainerLayout = React.useCallback(
       (event: LayoutChangeEvent) => {
-        setContainerWidth(event.nativeEvent.layout.width)
+        setContainerWidth(event.nativeEvent.layout.width);
       },
-      []
-    )
+      [],
+    );
 
-    const handlePress = () => data?.link && Linking.openURL(data.link)
+    const handlePress = () => data?.link && Linking.openURL(data.link);
 
     const renderDescriptionNode = (description: string) => {
       return oneOf(
         renderDescription,
         <Text numberOfLines={3} style={styles.description}>
           {description}
-        </Text>
-      )(description)
-    }
+        </Text>,
+      )(description);
+    };
 
     const renderHeaderNode = () => {
       return header
@@ -127,21 +127,21 @@ export const LinkPreview = React.memo(
             renderHeader,
             <Text numberOfLines={1} style={styles.header}>
               {header}
-            </Text>
+            </Text>,
           )(header)
-        : null
-    }
+        : null;
+    };
 
     const renderImageNode = (image: PreviewDataImage) => {
       // aspectRatio shouldn't be undefined, just an additional check
       /* istanbul ignore next */
-      const ar = aspectRatio ?? 1
+      const ar = aspectRatio ?? 1;
 
       return oneOf(
         renderImage,
         <Image
-          accessibilityRole='image'
-          resizeMode='contain'
+          accessibilityRole="image"
+          resizeMode="contain"
           source={{ uri: image.url }}
           style={StyleSheet.flatten([
             styles.image,
@@ -157,9 +157,9 @@ export const LinkPreview = React.memo(
                   width: containerWidth,
                 },
           ])}
-        />
-      )(image)
-    }
+        />,
+      )(image);
+    };
 
     const renderLinkPreviewNode = () => {
       return oneOf(
@@ -169,8 +169,7 @@ export const LinkPreview = React.memo(
             style={StyleSheet.flatten([
               styles.textContainer,
               textContainerStyle,
-            ])}
-          >
+            ])}>
             {renderHeaderNode()}
             {renderTextNode()}
             {/* Render metadata only if there are either description OR title OR
@@ -185,14 +184,12 @@ export const LinkPreview = React.memo(
                 style={StyleSheet.flatten([
                   styles.metadataContainer,
                   metadataContainerStyle,
-                ])}
-              >
+                ])}>
                 <View
                   style={StyleSheet.flatten([
                     styles.metadataTextContainer,
                     metadataTextContainerStyle,
-                  ])}
-                >
+                  ])}>
                   {data?.title && renderTitleNode(data.title)}
                   {data?.description && renderDescriptionNode(data.description)}
                 </View>
@@ -208,49 +205,48 @@ export const LinkPreview = React.memo(
           {data?.image &&
             (aspectRatio !== 1 || (!data?.description && !data.title)) &&
             renderImageNode(data.image)}
-        </>
+        </>,
       )({
         aspectRatio,
         containerWidth,
         previewData: data,
-      })
-    }
+      });
+    };
 
     const renderMinimizedImageNode = (image: PreviewDataImage) => {
       return oneOf(
         renderMinimizedImage,
         <Image
-          accessibilityRole='image'
+          accessibilityRole="image"
           source={{ uri: image.url }}
           style={styles.minimizedImage}
-        />
-      )(image)
-    }
+        />,
+      )(image);
+    };
 
-    const renderTextNode = () => oneOf(renderText, <Text>{text}</Text>)(text)
+    const renderTextNode = () => oneOf(renderText, <Text>{text}</Text>)(text);
 
     const renderTitleNode = (title: string) => {
       return oneOf(
         renderTitle,
         <Text numberOfLines={2} style={styles.title}>
           {title}
-        </Text>
-      )(title)
-    }
+        </Text>,
+      )(title);
+    };
 
     return (
       <TouchableWithoutFeedback
-        accessibilityRole='button'
+        accessibilityRole="button"
         onPress={handlePress}
-        {...touchableWithoutFeedbackProps}
-      >
+        {...touchableWithoutFeedbackProps}>
         <View onLayout={handleContainerLayout} style={containerStyle}>
           {renderLinkPreviewNode()}
         </View>
       </TouchableWithoutFeedback>
-    )
-  }
-)
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   description: {
@@ -283,4 +279,4 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
   },
-})
+});

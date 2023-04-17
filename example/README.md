@@ -3,7 +3,7 @@
 ## Getting Started
 
 ```bash
-yarn
+npm install
 ```
 
 for iOS:
@@ -15,13 +15,13 @@ npx pod-install
 To run the app use:
 
 ```bash
-yarn ios
+npm run ios
 ```
 
 or
 
 ```bash
-yarn android
+npm run android
 ```
 
 ## Updating project

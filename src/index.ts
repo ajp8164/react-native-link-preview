@@ -1,3 +1,3 @@
-export * from './LinkPreview'
-export * from './types'
-export * from './utils'
+export * from './LinkPreview';
+export * from './types';
+export * from './utils';

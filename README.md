@@ -13,7 +13,7 @@ Fully customizable preview of the URL extracted from the provided text.
 ## Getting Started
 
 ```sh
-yarn add @flyerhq/react-native-link-preview
+npm install @flyerhq/react-native-link-preview
 ```
 
 ## Usage

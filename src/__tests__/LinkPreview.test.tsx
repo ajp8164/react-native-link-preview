@@ -1,25 +1,26 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native'
-import React from 'react'
-import { Linking } from 'react-native'
-import { ReactTestInstance } from 'react-test-renderer'
+import * as utils from '../utils';
 
-import { LinkPreview } from '../LinkPreview'
-import * as utils from '../utils'
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+
+import { LinkPreview } from '../LinkPreview';
+import { Linking } from 'react-native';
+import React from 'react';
+import { ReactTestInstance } from 'react-test-renderer';
 
 describe('link preview', () => {
   it('does nothing on press if no url is detected', async () => {
-    expect.assertions(1)
-    const openUrlMock = jest.spyOn(Linking, 'openURL')
-    const { getByRole } = render(<LinkPreview text='' />)
-    const button = getByRole('button')
-    fireEvent.press(button)
-    expect(openUrlMock).not.toHaveBeenCalled()
-    openUrlMock.mockRestore()
-  })
+    expect.assertions(1);
+    const openUrlMock = jest.spyOn(Linking, 'openURL');
+    const { getByRole } = render(<LinkPreview text="" />);
+    const button = getByRole('button');
+    fireEvent.press(button);
+    expect(openUrlMock).not.toHaveBeenCalled();
+    openUrlMock.mockRestore();
+  });
 
   it('opens url on button press', async () => {
-    expect.assertions(1)
-    const link = 'https://github.com/flyerhq/'
+    expect.assertions(1);
+    const link = 'https://github.com/flyerhq/';
     const getPreviewDataMock = jest
       .spyOn(utils, 'getPreviewData')
       .mockResolvedValue({
@@ -31,21 +32,21 @@ describe('link preview', () => {
         },
         link,
         title: 'title',
-      })
-    const openUrlMock = jest.spyOn(Linking, 'openURL')
-    const { getByRole, getByText } = render(<LinkPreview text={link} />)
-    await waitFor(() => getByText(link))
-    const button = getByRole('button')
-    fireEvent.press(button)
-    expect(openUrlMock).toHaveBeenCalledWith(link)
-    getPreviewDataMock.mockRestore()
-    openUrlMock.mockRestore()
-  })
+      });
+    const openUrlMock = jest.spyOn(Linking, 'openURL');
+    const { getByRole, getByText } = render(<LinkPreview text={link} />);
+    await waitFor(() => getByText(link));
+    const button = getByRole('button');
+    fireEvent.press(button);
+    expect(openUrlMock).toHaveBeenCalledWith(link);
+    getPreviewDataMock.mockRestore();
+    openUrlMock.mockRestore();
+  });
 
   it('renders image node and header', async () => {
-    expect.assertions(2)
-    const header = 'header'
-    const link = 'https://github.com/flyerhq/'
+    expect.assertions(2);
+    const header = 'header';
+    const link = 'https://github.com/flyerhq/';
     const { getByRole, getByText } = render(
       <LinkPreview
         header={header}
@@ -58,18 +59,18 @@ describe('link preview', () => {
           link,
         }}
         text={link}
-      />
-    )
-    await waitFor(() => getByText(link))
-    const image = getByRole('image')
-    expect(image.props).toHaveProperty('style.height', 0)
-    const headerNode = getByText(header)
-    expect(headerNode).toBeDefined()
-  })
+      />,
+    );
+    await waitFor(() => getByText(link));
+    const image = getByRole('image');
+    expect(image.props).toHaveProperty('style.height', 0);
+    const headerNode = getByText(header);
+    expect(headerNode).toBeDefined();
+  });
 
   it('renders vertical image node', async () => {
-    expect.assertions(1)
-    const link = 'https://dummyimage.com/300x800/000/fff'
+    expect.assertions(1);
+    const link = 'https://dummyimage.com/300x800/000/fff';
     const { getByRole, getByText } = render(
       <LinkPreview
         previewData={{
@@ -81,16 +82,16 @@ describe('link preview', () => {
           link,
         }}
         text={link}
-      />
-    )
-    await waitFor(() => getByText(link))
-    const image = getByRole('image')
-    expect(image.props).toHaveProperty('style.height', 0)
-  })
+      />,
+    );
+    await waitFor(() => getByText(link));
+    const image = getByRole('image');
+    expect(image.props).toHaveProperty('style.height', 0);
+  });
 
   it('responses to the layout event change', async () => {
-    expect.assertions(1)
-    const link = 'https://github.com/flyerhq/'
+    expect.assertions(1);
+    const link = 'https://github.com/flyerhq/';
     const { getByRole, getByText } = render(
       <LinkPreview
         previewData={{
@@ -102,18 +103,18 @@ describe('link preview', () => {
           link,
         }}
         text={link}
-      />
-    )
-    await waitFor(() => getByText(link))
-    const container = getByRole('button').children[0] as ReactTestInstance
+      />,
+    );
+    await waitFor(() => getByText(link));
+    const container = getByRole('button').children[0] as ReactTestInstance;
     fireEvent(container, 'layout', {
       nativeEvent: {
         layout: {
           width: 300,
         },
       },
-    })
-    const image = getByRole('image')
-    expect(image.props).toHaveProperty('style.width', 300)
-  })
-})
+    });
+    const image = getByRole('image');
+    expect(image.props).toHaveProperty('style.width', 300);
+  });
+});
