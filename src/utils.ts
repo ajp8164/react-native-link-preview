@@ -1,7 +1,7 @@
-import { decode } from 'html-entities'
-import { Image } from 'react-native'
-
 import { PreviewData, PreviewDataImage, Size } from './types'
+
+import { Image } from 'react-native'
+import { decode } from 'html-entities'
 
 export const getActualImageUrl = (baseUrl: string, imageUrl?: string) => {
   let actualImageUrl = imageUrl?.trim()
@@ -55,14 +55,17 @@ export const getImageSize = (url: string) => {
 // Functions below use functions from the same file and mocks are not working
 /* istanbul ignore next */
 export const getPreviewData = async (text: string, requestTimeout = 5000) => {
-  const previewData: PreviewData = {
-    description: undefined,
-    image: undefined,
-    link: undefined,
-    title: undefined,
-  }
+  const previewData: PreviewData = {}
 
   try {
+    // Reset regexp indices to ensure matching on fetched data everytime.
+    REGEX_TITLE.lastIndex = 0;
+    REGEX_META.lastIndex = 0;
+    REGEX_EMAIL.lastIndex = 0;
+    REGEX_IMAGE_CONTENT_TYPE.lastIndex = 0;
+    REGEX_IMAGE_TAG.lastIndex = 0;
+    REGEX_LINK.lastIndex = 0;
+
     const textWithoutEmails = text.replace(REGEX_EMAIL, '').trim()
 
     if (!textWithoutEmails) return previewData
@@ -103,7 +106,7 @@ export const getPreviewData = async (text: string, requestTimeout = 5000) => {
 
     if (REGEX_IMAGE_CONTENT_TYPE.test(contentType)) {
       const image = await getPreviewDataImage(url)
-      previewData.image = image
+      if (image) previewData.image = image;
       return previewData
     }
 
@@ -116,7 +119,7 @@ export const getPreviewData = async (text: string, requestTimeout = 5000) => {
 
     // Get page title
     const title = REGEX_TITLE.exec(head)
-    previewData.title = getHtmlEntitiesDecodedText(title?.[1])
+    previewData.title = getHtmlEntitiesDecodedText(title?.[1]) || '';
 
     let matches: RegExpMatchArray | null
     const meta: RegExpMatchArray[] = []
@@ -155,9 +158,10 @@ export const getPreviewData = async (text: string, requestTimeout = 5000) => {
       { title: previewData.title }
     )
 
-    previewData.description = metaPreviewData.description
-    previewData.image = await getPreviewDataImage(metaPreviewData.imageUrl)
-    previewData.title = metaPreviewData.title
+    previewData.description = metaPreviewData.description || '';
+    const image = await getPreviewDataImage(metaPreviewData.imageUrl);
+    if (image) previewData.image = image;
+    previewData.title = metaPreviewData.title || '';
 
     if (!previewData.image) {
       let imageMatches: RegExpMatchArray | null
@@ -169,8 +173,9 @@ export const getPreviewData = async (text: string, requestTimeout = 5000) => {
       let images: PreviewDataImage[] = []
 
       for (const tag of tags
-        .filter((t) => !t[1].startsWith('data'))
-        .slice(0, 5)) {
+        // Skip gif images, consider only the first 10.
+        .filter((t) => !t[1].startsWith('data') && !t[1].endsWith('gif'))
+        .slice(0, 10)) {
         const image = await getPreviewDataImage(getActualImageUrl(url, tag[1]))
 
         if (!image) continue
@@ -178,9 +183,10 @@ export const getPreviewData = async (text: string, requestTimeout = 5000) => {
         images = [...images, image]
       }
 
-      previewData.image = images.sort(
+      const image = images.sort(
         (a, b) => b.height * b.width - a.height * a.width
       )[0]
+      if (image) previewData.image = image;
     }
 
     return previewData
@@ -214,12 +220,12 @@ export const oneOf =
   }
 
 export const REGEX_EMAIL = /([a-zA-Z0-9+._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g
-export const REGEX_IMAGE_CONTENT_TYPE = /image\/*/g
+export const REGEX_IMAGE_CONTENT_TYPE = /image\/*/gi
 // Consider empty line after img tag and take only the src field, space before to not match data-src for example
-export const REGEX_IMAGE_TAG = /<img[\n\r]*.*? src=["'](.*?)["']/g
+export const REGEX_IMAGE_TAG = /<img[\n\r]*.*? src=["'](.*?)["']/gi
 export const REGEX_LINK =
   /((http|ftp|https):\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/i
 // Some pages write content before the name/property, some use single quotes instead of double
 export const REGEX_META =
-  /<meta.*?(property|name)=["'](.*?)["'].*?content=["'](.*?)["'].*?>/g
-export const REGEX_TITLE = /<title.*?>(.*?)<\/title>/g
+  /<meta.*?(property|name)=["'](.*?)["'].*?content=["'](.*?)["'].*?>/gi
+export const REGEX_TITLE = /<title.*?>(.*?)<\/title>/gi
